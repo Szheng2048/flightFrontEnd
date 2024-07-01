@@ -11,7 +11,10 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import { Link } from "react-router-dom";
+import { Link,Navigate } from "react-router-dom";
+import {UserContext} from '../context/userContext'
+import { useContext, useState } from 'react';
+
 
 function Copyright(props) {
   return (
@@ -31,13 +34,16 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignInSide() {
-  const handleSubmit = (event) => {
+  const {dispatch} = useContext(UserContext)
+  const [user, setUser] = useState("")
+  const [password, setPassword] = useState("")
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const validUser = dispatch({type:"SIGN_IN_USER",payload:{user,password}})
+    if(validUser){
+      return <Navigate to="/home"/>
+    }
   };
 
   return (
@@ -84,6 +90,8 @@ export default function SignInSide() {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                onChange={(e)=>setUser(e.target.value)}
+                value={user}
               />
               <TextField
                 margin="normal"
@@ -94,6 +102,8 @@ export default function SignInSide() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                onChange={(e)=>setPassword(e.target.value)}
+                value={password}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}

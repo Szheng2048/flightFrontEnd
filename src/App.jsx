@@ -9,11 +9,6 @@ import { useEffect } from "react"
 import checkIfUserIsAuth from './utils/checkifUserisAuthorized'
 
 function App() {
-  useEffect(() => {
-    if(checkIfUserIsAuth()){
-      
-    }
-  }, [])
   
   return (
     <Layout>

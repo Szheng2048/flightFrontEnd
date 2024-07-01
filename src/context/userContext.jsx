@@ -1,8 +1,6 @@
 import {useReducer, createContext} from 'react'
 import Axios from '../utils/Axios'
-import checkIfUserIsAuth from '../utils/checkifUserisAuthorized'
 import {jwtDecode} from 'jwt-decode'
-import setAxiosAuthToken from '../utils/setAxiosAuthToken'
 
 
 const reducer = async (oldState,action)=>{
@@ -11,8 +9,9 @@ const reducer = async (oldState,action)=>{
             const {username,email,firstName,lastName,password} = action.payload
             try {
                 await Axios.post("/user/sign-up",{username,email,firstName,lastName,password})
-                await Axios.post("/user/sign-in",{user:email,password})
-                
+                const response = await Axios.post("/user/sign-in",{user:email,password})
+                window.localStorage.setItem("jwt",response.data.payload)
+                return {...oldState,user:response.data.payload}
             } catch (error) {
                 console.log(error.message)
             }
@@ -20,14 +19,21 @@ const reducer = async (oldState,action)=>{
         case "SIGN_IN_USER":{
             const {user,password} =action.payload
             try {
-                await Axios
+                const response = await Axios.post('/user/sign-in',{user,password})
+                console.log(response)
+                window.localStorage.setItem("jwt",response.data.payload)
+                return {...oldState,user:checkIfUserExist()}
             } catch (error) {
-                
+                console.log(error.message)
             }
         }
         case "LOG_OUT_USER":{
+            window.localStorage.removeItem("jwt")
+            console.log(oldState)
 
+            return {...oldState,user:null}
         }
+        default: return oldState
     }
 }
 
@@ -36,6 +42,8 @@ const checkIfUserExist = ()=>{
     const decodedUser = jwt? jwtDecode(jwt):null
     if(decodedUser && decodedUser.exp > (Date.now()/1000)){
         return decodedUser
+    } else {
+        return null
     }
 }
 
@@ -45,13 +53,13 @@ export const UserContext = createContext()
 
 export const UserContextProvider =({children})=>{
 
-    const initialState = checkIfUserExist()
+    const initialState = {user:checkIfUserExist()}
     
 
-    const [mainUser, dispatch] = useReducer(reducer, initialState)
+    const [user, dispatch] = useReducer(reducer, initialState)
 
     return(
-        <UserContext.Provider value={{mainUser,dispatch}}>
+        <UserContext.Provider value={{user,dispatch}}>
             {children}
         </UserContext.Provider>
     )

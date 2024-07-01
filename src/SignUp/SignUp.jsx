@@ -15,6 +15,7 @@ import {useState} from 'react'
 import {toast, ToastContainer} from 'react-toastify'
 import "./SignUp.css"
 import {UserContext} from '../context/userContext'
+import {Navigate} from 'react-router-dom'
 
 import {
   validFirstName,
@@ -65,7 +66,6 @@ export default function SignUp() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("hello")
     const data = {username,email,firstName,lastName,password}
     if(validFirstName(firstName)&&validLastName(lastName)&&validEmail(email)&&validUserName(username)&&validPassword(password)&&password===confirmPassword){
       dispatch({type:"CREATE_NEW_USER",payload:data})
@@ -108,7 +108,7 @@ export default function SignUp() {
             });
         }
       }
-      
+      <Navigate to="/home"/>
     }
   };
 
